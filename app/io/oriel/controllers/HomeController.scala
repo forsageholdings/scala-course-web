@@ -1,4 +1,4 @@
-package controllers
+package io.oriel.controllers
 
 import javax.inject._
 import play.api._

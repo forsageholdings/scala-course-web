@@ -2,7 +2,6 @@ package io.oriel.samples
 
 import java.util.concurrent.CompletableFuture
 import java.util.function.BiFunction
-
 import org.asynchttpclient.Dsl._
 import org.asynchttpclient.Response
 
@@ -30,6 +29,9 @@ class HttpClient {
     * Docs: [[https://openweathermap.org/current]]
     */
   def fetchWeather(): Unit = {
-    get("https://api.openweathermap.org/data/2.5/forecast?APPID=8a654755117d4187fe196da6cc828b8c&lat=44.4333&lon=26.1")
+    get("https://api.openweathermap.org/data/2.5/forecast" +
+      "?APPID=8a654755117d4187fe196da6cc828b8c" +
+      "&unit=metric" +
+      "&lat=44.4333&lon=26.1")
   }
 }

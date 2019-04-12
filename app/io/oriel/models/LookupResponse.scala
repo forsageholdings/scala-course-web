@@ -1,6 +1,5 @@
 package io.oriel.models
 
-import io.oriel.services.Location
 import play.api.libs.json.Json
 
 case class LookupResponse(

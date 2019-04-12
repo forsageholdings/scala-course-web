@@ -1,10 +1,7 @@
 package io.oriel.services
 
 import java.util.function.BiFunction
-
-import io.oriel.models.WeatherInfo
-import java.io
-
+import io.oriel.models._
 import org.asynchttpclient.Dsl._
 import org.asynchttpclient._
 import play.api.libs.json.{JsError, JsSuccess, Json}

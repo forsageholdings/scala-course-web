@@ -2,14 +2,9 @@ package io.oriel.services
 
 import java.net.InetAddress
 import com.maxmind.geoip2.DatabaseReader
-import play.api.libs.json._
+import io.oriel.models.Location
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class Location(lat: Double, lon: Double)
-
-object Location {
-  implicit val writes = Json.format[Location]
-}
 
 final class GeoIPInfo private (reader: DatabaseReader) {
 

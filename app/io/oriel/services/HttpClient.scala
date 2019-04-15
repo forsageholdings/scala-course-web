@@ -53,7 +53,6 @@ class HttpClient private (client: AsyncHttpClient) {
         }
     }
   }
-
 }
 
 object HttpClient {

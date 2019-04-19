@@ -1,39 +1,36 @@
 package io.oriel.services
 
 import java.util.function.BiFunction
+
 import io.oriel.models._
+import monix.eval.Task
 import org.asynchttpclient.Dsl._
 import org.asynchttpclient._
 import play.api.libs.json.{JsError, JsSuccess, Json}
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
-
 class HttpClient private (client: AsyncHttpClient) {
   import HttpClient.Error
 
-  def requestGET(url: String): Future[Either[Error, String]] = {
-    val javaFuture = client.prepareGet(url).execute().toCompletableFuture
-    val p: Promise[Either[Error, String]] = Promise()
+  def requestGET(url: String): Task[Either[Error, String]] = {
+    Task.async { cb =>
+      val javaFuture = client.prepareGet(url).execute().toCompletableFuture
 
-    javaFuture.handle[Unit](
-      new BiFunction[Response, Throwable, Unit] {
-        def apply(resp: Response, error: Throwable): Unit = {
-          if (error != null) {
-            p.failure(error)
-          } else if (resp.getStatusCode >= 400) {
-            p.success(Left("HTTP Error: " + resp.getStatusCode))
-          } else {
-            p.success(Right(resp.getResponseBody))
+      javaFuture.handle[Unit](
+        new BiFunction[Response, Throwable, Unit] {
+          def apply(resp: Response, error: Throwable): Unit = {
+            if (error != null) {
+              cb.onError(error)
+            } else if (resp.getStatusCode >= 400) {
+              cb.onSuccess(Left("HTTP Error: " + resp.getStatusCode))
+            } else {
+              cb.onSuccess(Right(resp.getResponseBody))
+            }
           }
-        }
-      })
-
-    p.future
+        })
+    }
   }
 
-  def fetchWeather(location: Location)
-    (implicit ec: ExecutionContext): Future[Either[Error, WeatherInfo]] = {
-
+  def fetchWeather(location: Location): Task[Either[Error, WeatherInfo]] = {
     val response = requestGET(
       "https://api.openweathermap.org/data/2.5/forecast" +
       "?APPID=8a654755117d4187fe196da6cc828b8c" +

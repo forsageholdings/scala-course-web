@@ -3,9 +3,11 @@ package io.oriel.controllers
 import io.oriel.models.LookupResponse
 import io.oriel.services.{GeoIPInfo, HttpClient}
 import javax.inject._
+import monix.eval.Task
 import play.api._
 import play.api.libs.json._
 import play.api.mvc._
+import play.mvc.Http.Response
 
 import scala.concurrent.Future
 
@@ -15,7 +17,7 @@ import scala.concurrent.Future
  */
 @Singleton
 class HomeController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import monix.execution.Scheduler.Implicits.global
   private val geoIP = GeoIPInfo()
   private val httpClient = HttpClient()
 
@@ -30,19 +32,24 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     Ok(io.oriel.views.html.index())
   }
 
-  def lookup = Action.async { request =>
+  def ActionTask(f: Request[AnyContent] => Task[Result]): Action[AnyContent] =
+    Action.async { request =>
+      f(request).runToFuture
+    }
+
+  def lookup = ActionTask { request =>
     val ipOpt: Option[String] =
       request.getQueryString("ip")
         .orElse(RequestUtils.getRealIP(request))
 
     ipOpt match {
       case None =>
-        Future.successful(NotFound("Missing IP"))
+        Task.pure(NotFound("Missing IP"))
 
       case Some(ip) =>
         geoIP.getLocation(ip).flatMap {
           case None =>
-            Future.successful(NotFound("Unknown or invalid IP"))
+            Task.pure(NotFound("Unknown or invalid IP"))
 
           case Some(location) =>
             httpClient.fetchWeather(location).map {

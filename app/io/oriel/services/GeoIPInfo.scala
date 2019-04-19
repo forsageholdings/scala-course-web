@@ -3,15 +3,13 @@ package io.oriel.services
 import java.net.InetAddress
 import com.maxmind.geoip2.DatabaseReader
 import io.oriel.models.Location
-import scala.concurrent.{ExecutionContext, Future}
-
+import scala.concurrent.Future
+import monix.eval.Task
 
 final class GeoIPInfo private (reader: DatabaseReader) {
 
-  def getLocation(ip: String)
-    (implicit ec: ExecutionContext): Future[Option[Location]] = {
-
-    Future {
+  def getLocation(ip: String): Task[Option[Location]] = {
+    Task {
       for {
         location <- Option(reader.city(InetAddress.getByName(ip)))
         latLon   <- Option(location.getLocation)

@@ -9,10 +9,10 @@ import org.asynchttpclient._
 import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class HttpClient private (client: AsyncHttpClient) {
-  import HttpClient.Error
+  import HttpClient.HttpError
 
-  def requestGET(url: String): Task[Either[Error, String]] = {
-    Task.async { cb =>
+  def requestGET(url: String): Task[Either[HttpError, String]] = {
+    Task.cancelable { cb =>
       val javaFuture = client.prepareGet(url).execute().toCompletableFuture
 
       javaFuture.handle[Unit](
@@ -27,10 +27,13 @@ class HttpClient private (client: AsyncHttpClient) {
             }
           }
         })
+
+      // Logic for cancellation, to be used in race conditions
+      Task(javaFuture.cancel(false))
     }
   }
 
-  def fetchWeather(location: Location): Task[Either[Error, WeatherInfo]] = {
+  def fetchWeather(location: Location): Task[Either[HttpError, WeatherInfo]] = {
     val response = requestGET(
       "https://api.openweathermap.org/data/2.5/forecast" +
       "?APPID=8a654755117d4187fe196da6cc828b8c" +
@@ -56,7 +59,7 @@ object HttpClient {
   /**
     * For readability.
     */
-  type Error = String
+  type HttpError = String
 
   /**
     * Builder.

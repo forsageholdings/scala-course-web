@@ -4,12 +4,8 @@ import io.oriel.models.LookupResponse
 import io.oriel.services.{GeoIPInfo, HttpClient}
 import javax.inject._
 import monix.eval.Task
-import play.api._
 import play.api.libs.json._
 import play.api.mvc._
-import play.mvc.Http.Response
-
-import scala.concurrent.Future
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -21,13 +17,6 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
   private val geoIP = GeoIPInfo()
   private val httpClient = HttpClient()
 
-  /**
-   * Create an Action to render an HTML page.
-   *
-   * The configuration in the `routes` file means that this method
-   * will be called when the application receives a `GET` request with
-   * a path of `/`.
-   */
   def index() = Action { implicit request: Request[AnyContent] =>
     Ok(io.oriel.views.html.index())
   }

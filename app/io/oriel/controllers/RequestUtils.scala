@@ -23,7 +23,7 @@ object RequestUtils {
     }
 
   private def remoteAddress(request: Request[_]): Option[String] =
-    Option(request.remoteAddress).filter(validateIPRef)
+    Option(request.remoteAddress).filter(validatePublicIP)
 
   /**
     * Returns `true` if the given IP address is a real and public IP
@@ -37,6 +37,4 @@ object RequestUtils {
       case NonFatal(_) => false
     }
   }
-
-  private[this] val validateIPRef = validatePublicIP _
 }
